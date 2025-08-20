@@ -23,7 +23,7 @@ const __dirname = path.dirname(__filename);
 
 // CORS configuration
 app.use(cors({
-  origin: ["http://localhost:3000"],
+  origin: ["http://localhost:3000","https://vlabeth.netlify.app"],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -37,7 +37,7 @@ app.use(express.json());
 
 // Base route
 app.get("/", (req, res) => {
-  res.send({ message: "SafeGuard Ethiopia API is running..." });
+  res.send({ message: "V-Lab Ethiopia API is running..." });
 });
 
 // API routes
