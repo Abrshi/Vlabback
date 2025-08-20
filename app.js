@@ -23,7 +23,7 @@ const __dirname = path.dirname(__filename);
 
 // CORS configuration
 app.use(cors({
-  origin: ["http://localhost:3000"],
+  origin: ["https://vlabeth.netlify.app"],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
