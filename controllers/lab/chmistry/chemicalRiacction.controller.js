@@ -11,11 +11,25 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" });
 
 export const chemicalReaction = async (req, res) => {
-  const { chemicals, temperature, user } = req.body; // ✅ make sure exType is passed in body
-const exType='chmistry'
-  try {
-    console.log("Received chemicals:", chemicals, "at", temperature, "°C", "from user:", user.id);
+  const { chemicals, temperature, user } = req.body; // expects user object or userId
+  const exType = 'chmistry';
 
+  try {
+    // ✅ Ensure we have a valid numeric userId
+    const userId = Number(user?.id || user); // supports user object or just userId
+    if (!userId) {
+      return res.status(400).json({ error: "Invalid or missing userId" });
+    }
+
+    // ✅ Verify user exists
+    const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+    if (!existingUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log("Received chemicals:", chemicals, "at", temperature, "°C", "from user:", userId);
+
+    // 🔹 Prepare AI prompt
     const prompt = `
 You are a chemist AI.
 A reaction occurs between: ${chemicals.join(" and ")} at ${temperature}°C.  
@@ -30,6 +44,7 @@ Return ONLY valid JSON with the following fields:
 No extra words, no markdown, no code fences — only JSON.
     `;
 
+    // 🔹 Call Google Gemini AI
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
@@ -42,10 +57,8 @@ No extra words, no markdown, no code fences — only JSON.
       return res.status(500).json({ error: "No response from Gemini model." });
     }
 
-    let cleanedText = rawText
-      .replace(/```json/gi, "")
-      .replace(/```/g, "")
-      .trim();
+    // 🔹 Clean and parse AI JSON
+    const cleanedText = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
 
     let jsonData;
     try {
@@ -55,38 +68,30 @@ No extra words, no markdown, no code fences — only JSON.
       return res.status(500).json({ error: "Invalid JSON response from AI" });
     }
 
-    // 1. Save full reaction record
+    // 🔹 Save chemical reaction to DB safely
     const savedReaction = await prisma.chemicalReactionResult.create({
       data: {
-        user_id: user.id,
         formula: jsonData.formula,
         reaction_type: jsonData.reaction_type,
         color_gradient: jsonData.color_gradient,
         temperature: jsonData.temperature,
         observations: jsonData.observations,
+        user: {
+          connect: { id: userId }, // ✅ Prisma relation ensures FK exists
+        },
       },
     });
     console.log("Chemical reaction saved to DB:", savedReaction.id);
 
-    // 2. Update stats (track experiments count)
-    if (exType) {
-      await prisma.experimentStats.upsert({
-        where: {
-          user_id_exType: { user_id: user.id, exType }, // ✅ requires @@unique in schema
-        },
-        update: {
-          count: { increment: 1 },
-        },
-        create: {
-          user_id: user.id,
-          exType,
-          count: 1,
-        },
-      });
-      console.log(`Experiment stats updated for ${exType}`);
-    }
+    // 🔹 Update experiment stats
+    await prisma.experimentStats.upsert({
+      where: { user_id_exType: { user_id: userId, exType } },
+      update: { count: { increment: 1 } },
+      create: { user_id: userId, exType, count: 1 },
+    });
+    console.log(`Experiment stats updated for ${exType}`);
 
-    // 3. Respond to client
+    // 🔹 Respond to client
     return res.json(jsonData);
 
   } catch (err) {
