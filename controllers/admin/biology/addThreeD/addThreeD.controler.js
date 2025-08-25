@@ -20,7 +20,7 @@ export const bulkSaveModels = async (req, res) => {
             category: m.category || null,
             subcategory: m.subcategory || null,
             embedUrl: m.embedUrl || null,
-            uploaded_by: userId,
+            uploadedBy: userId,   // ✅ camelCase, not uploaded_by
           },
           create: {
             uid: m.uid,
@@ -29,7 +29,7 @@ export const bulkSaveModels = async (req, res) => {
             category: m.category || null,
             subcategory: m.subcategory || null,
             embedUrl: m.embedUrl || null,
-            uploaded_by: userId,
+            uploadedBy: userId,   // ✅ same here
           },
         })
       )
