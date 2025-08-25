@@ -13,7 +13,7 @@ export const bulkSaveModels = async (req, res) => {
 
     const savedModels = await Promise.all(
       models.map((m) =>
-        prisma.threeDModel.create({
+        prisma.threeModel.create({
           data: {
             uid: m.uid,
             name: m.name,
@@ -37,7 +37,7 @@ export const bulkSaveModels = async (req, res) => {
 // Get all models
 export const getAllModels = async (req, res) => {
   try {
-    const models = await prisma.threeDModel.findMany({
+    const models = await prisma.threeModel.findMany({
       include: { user: { select: { id: true, full_name: true, email: true } } },
     });
     res.json(models);
@@ -51,7 +51,7 @@ export const getAllModels = async (req, res) => {
 export const getModelById = async (req, res) => {
   try {
     const { id } = req.params;
-    const model = await prisma.threeDModel.findUnique({
+    const model = await prisma.threeModel.findUnique({
       where: { id: Number(id) },
       include: { user: { select: { id: true, full_name: true, email: true } } },
     });

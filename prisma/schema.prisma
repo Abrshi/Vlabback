@@ -20,6 +20,7 @@ model User {
   ExperimentStats    ExperimentStats[]
   sessions           Session[]
   threeDModels       ThreeDModel[]
+  threeModels       ThreeModel[]
   userActivities     UserActivity?
 }
 
@@ -63,6 +64,18 @@ model UserActivity {
 }
 
 model ThreeDModel {
+  id          Int      @id @default(autoincrement())
+  uid         String   @unique @db.VarChar(255)
+  name        String   @db.VarChar(255)
+  thumbnail   String   @db.VarChar(500)
+  category    String?  @db.VarChar(100)
+  subcategory String?  @db.VarChar(100)
+  embedUrl    String?  @db.VarChar(500)
+  created_at  DateTime @default(now())
+  uploaded_by Int?
+  user        User?    @relation(fields: [uploaded_by], references: [id])
+}
+model ThreeModel {
   id          Int      @id @default(autoincrement())
   uid         String   @unique @db.VarChar(255)
   name        String   @db.VarChar(255)
