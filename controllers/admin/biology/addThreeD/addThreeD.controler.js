@@ -1,16 +1,10 @@
-// controllers/modelController.js
 import { PrismaClient } from "@prisma/client";
-
 const prisma = new PrismaClient();
 
-// Bulk insert or update models
 export const bulkSaveModels = async (req, res) => {
   try {
-    const models = req.body; // array of models
-    const userId = req.params?.userId ? parseInt(req.params.userId, 10) : null; // force Int
-
-    console.log("Received models:", models, "by user:", userId);
-    console.log("Request params:", req.params);
+    const models = req.body;
+    const userId = req.params?.userId ? parseInt(req.params.userId) : null;
 
     if (!Array.isArray(models)) {
       return res.status(400).json({ error: "Invalid data format" });
@@ -22,18 +16,18 @@ export const bulkSaveModels = async (req, res) => {
           where: { uid: m.uid },
           update: {
             name: m.name,
-            thumbnail: m.thumbnails?.images?.[0]?.url || "",
-            category: m.categories?.[0]?.name || null,
-            subcategory: m.categories?.[1]?.name || null,
+            thumbnail: m.thumbnail || "",
+            category: m.category || null,
+            subcategory: m.subcategory || null,
             embedUrl: m.embedUrl || null,
             uploaded_by: userId,
           },
           create: {
             uid: m.uid,
             name: m.name,
-            thumbnail: m.thumbnails?.images?.[0]?.url || "",
-            category: m.categories?.[0]?.name || null,
-            subcategory: m.categories?.[1]?.name || null,
+            thumbnail: m.thumbnail || "",
+            category: m.category || null,
+            subcategory: m.subcategory || null,
             embedUrl: m.embedUrl || null,
             uploaded_by: userId,
           },
@@ -47,6 +41,7 @@ export const bulkSaveModels = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 // Get all models
 export const getAllModels = async (req, res) => {
