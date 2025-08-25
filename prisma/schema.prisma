@@ -3,92 +3,85 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                 Int                      @id @default(autoincrement())
-  full_name          String                   @db.VarChar(100)
-  email              String                   @unique @db.VarChar(100)
-  password           String                   @db.VarChar(255)
-  role               Role                     @default(user)
-  created_at         DateTime                 @default(now())
-  is_verified        Boolean                  @default(false)
-  verification_token String?                  @db.VarChar(255)
-  reactions          ChemicalReactionResult[]
-  ExperimentStats    ExperimentStats[]
-  sessions           Session[]
-  threeDModels       ThreeDModel[]
-  threeModels       ThreeModel[]
-  userActivities     UserActivity?
-}
-
-model Session {
-  id            Int      @id @default(autoincrement())
-  user_id       Int
-  refresh_token String   @db.VarChar(255)
-  created_at    DateTime @default(now())
-  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-}
-
-model ChemicalReactionResult {
+model chemicalreactionresult {
   id             Int      @id @default(autoincrement())
   user_id        Int
   formula        String   @db.VarChar(255)
   reaction_type  String   @db.VarChar(50)
   color_gradient String   @db.VarChar(100)
   temperature    Int
-  observations   String
+  observations   String   @db.Text
   created_at     DateTime @default(now())
-  user           User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user           user     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "ChemicalReactionResult_user_id_fkey")
+
+  @@index([user_id], map: "ChemicalReactionResult_user_id_fkey")
 }
 
-model ExperimentStats {
+model experimentstats {
   id         Int      @id @default(autoincrement())
   user_id    Int
   exType     String   @db.VarChar(50)
   count      Int      @default(0)
   created_at DateTime @default(now())
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user       user     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "ExperimentStats_user_id_fkey")
 
-  @@unique([user_id, exType], name: "user_id_exType")
+  @@unique([user_id, exType], map: "ExperimentStats_user_id_exType_key")
 }
 
-model UserActivity {
+model session {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  refresh_token String   @db.VarChar(255)
+  created_at    DateTime @default(now())
+  user          user     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "Session_user_id_fkey")
+
+  @@index([user_id], map: "Session_user_id_fkey")
+}
+
+model threedmodel {
+  id          Int      @id @default(autoincrement())
+  uid         String   @unique(map: "ThreeDModel_uid_key") @db.VarChar(255)
+  name        String   @db.VarChar(255)
+  thumbnail   String   @db.VarChar(500)
+  category    String?  @db.VarChar(100)
+  subcategory String?  @db.VarChar(100)
+  embedUrl    String?  @db.VarChar(500)
+  created_at  DateTime @default(now())
+  uploaded_by Int?
+  user        user?    @relation(fields: [uploaded_by], references: [id], map: "ThreeDModel_uploaded_by_fkey")
+
+  @@index([uploaded_by], map: "ThreeDModel_uploaded_by_fkey")
+}
+
+model user {
+  id                     Int                      @id @default(autoincrement())
+  full_name              String                   @db.VarChar(100)
+  email                  String                   @unique(map: "User_email_key") @db.VarChar(100)
+  password               String                   @db.VarChar(255)
+  role                   user_role                @default(user)
+  created_at             DateTime                 @default(now())
+  is_verified            Boolean                  @default(false)
+  verification_token     String?                  @db.VarChar(255)
+  chemicalreactionresult chemicalreactionresult[]
+  experimentstats        experimentstats[]
+  session                session[]
+  threedmodel            threedmodel[]
+  useractivity           useractivity?
+}
+
+model useractivity {
   id        Int      @id @default(autoincrement())
-  user_id   Int      @unique
+  user_id   Int      @unique(map: "UserActivity_user_id_key")
   totalTime Int      @default(0)
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [user_id], references: [id])
+  updatedAt DateTime
+  user      user     @relation(fields: [user_id], references: [id], map: "UserActivity_user_id_fkey")
 }
 
-model ThreeDModel {
-  id          Int      @id @default(autoincrement())
-  uid         String   @unique @db.VarChar(255)
-  name        String   @db.VarChar(255)
-  thumbnail   String   @db.VarChar(500)
-  category    String?  @db.VarChar(100)
-  subcategory String?  @db.VarChar(100)
-  embedUrl    String?  @db.VarChar(500)
-  created_at  DateTime @default(now())
-  uploaded_by Int?
-  user        User?    @relation(fields: [uploaded_by], references: [id])
-}
-model ThreeModel {
-  id          Int      @id @default(autoincrement())
-  uid         String   @unique @db.VarChar(255)
-  name        String   @db.VarChar(255)
-  thumbnail   String   @db.VarChar(500)
-  category    String?  @db.VarChar(100)
-  subcategory String?  @db.VarChar(100)
-  embedUrl    String?  @db.VarChar(500)
-  created_at  DateTime @default(now())
-  uploaded_by Int?
-  user        User?    @relation(fields: [uploaded_by], references: [id])
-}
-
-enum Role {
+enum user_role {
   user
   admin
 }

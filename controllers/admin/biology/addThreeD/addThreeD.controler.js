@@ -26,8 +26,7 @@ export const bulkSaveModels = async (req, res) => {
             uploaded_by: userId,
           },
         })
-      )
-    );
+      
 
     res.json({ success: true, count: savedModels.length, models: savedModels });
   } catch (error) {
