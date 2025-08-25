@@ -6,6 +6,7 @@ export const bulkSaveModels = async (req, res) => {
     const models = req.body;
     const userId = req.params?.userId ? parseInt(req.params.userId) : null;
 
+    console.log("Received models for bulk save:", models);
     if (!Array.isArray(models)) {
       return res.status(400).json({ error: "Invalid data format" });
     }
