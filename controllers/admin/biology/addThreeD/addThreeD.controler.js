@@ -11,9 +11,11 @@ export const bulkSaveModels = async (req, res) => {
       return res.status(400).json({ error: "Invalid data format" });
     }
 
-    const savedModels = await Promise.all(
-      models.map((m) =>
-        prisma.threeModel.create({
+    // const savedModels = await Promise.all(
+    //   models.map((m) =>
+    //     prisma.threeModel.create({
+        const savedModels = await prisma.threeModel.create({
+     
           data: {
             uid: m.uid,
             name: m.name,
