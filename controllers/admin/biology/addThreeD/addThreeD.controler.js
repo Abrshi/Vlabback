@@ -12,7 +12,7 @@ export const bulkSaveModels = async (req, res) => {
 
     const savedModels = await Promise.all(
       models.map((m) =>
-        prisma.threeDModel.upsert({
+        prisma.threeDModel.createMany({
           where: { uid: m.uid },
           update: {
             name: m.name,
