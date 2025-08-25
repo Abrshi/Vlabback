@@ -6,10 +6,12 @@ const prisma = new PrismaClient();
 // Bulk insert or update models
 export const bulkSaveModels = async (req, res) => {
   try {
-    const models = req.body; // array of models from frontend
-    const userId = req.params?.userId || null; // if you add auth later
+    const models = req.body; // array of models
+    const userId = req.params?.userId ? parseInt(req.params.userId, 10) : null; // force Int
+
     console.log("Received models:", models, "by user:", userId);
     console.log("Request params:", req.params);
+
     if (!Array.isArray(models)) {
       return res.status(400).json({ error: "Invalid data format" });
     }
