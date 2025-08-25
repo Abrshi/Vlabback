@@ -60,6 +60,21 @@ CREATE TABLE "public"."UserActivity" (
     CONSTRAINT "UserActivity_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."ThreeDModel" (
+    "id" SERIAL NOT NULL,
+    "uid" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "thumbnail" VARCHAR(500) NOT NULL,
+    "category" VARCHAR(100),
+    "subcategory" VARCHAR(100),
+    "embedUrl" VARCHAR(500),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "uploaded_by" INTEGER,
+
+    CONSTRAINT "ThreeDModel_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
 
@@ -68,6 +83,9 @@ CREATE UNIQUE INDEX "ExperimentStats_user_id_exType_key" ON "public"."Experiment
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserActivity_user_id_key" ON "public"."UserActivity"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ThreeDModel_uid_key" ON "public"."ThreeDModel"("uid");
 
 -- AddForeignKey
 ALTER TABLE "public"."Session" ADD CONSTRAINT "Session_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -80,3 +98,6 @@ ALTER TABLE "public"."ExperimentStats" ADD CONSTRAINT "ExperimentStats_user_id_f
 
 -- AddForeignKey
 ALTER TABLE "public"."UserActivity" ADD CONSTRAINT "UserActivity_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."ThreeDModel" ADD CONSTRAINT "ThreeDModel_uploaded_by_fkey" FOREIGN KEY ("uploaded_by") REFERENCES "public"."User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

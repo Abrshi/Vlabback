@@ -9,6 +9,7 @@ import chemicalReaction  from "./routes/lab/chmistry/chemicalRiacction.router.js
 import labHistory  from "./routes/profile/labHistory.router.js";
 import profile  from "./routes/profile/profile.router.js";
 import activityRoutes from "./routes/activity/activity.js";
+import addThreeDRouter from "./routes/admin/biology/addThreeD/addThreeD.route.js";
 
 // // Initialize environment
 dotenv.config();
@@ -46,6 +47,8 @@ app.use("/api/v1/chemistry/chmistry", chemicalReaction);
 app.use("/api/v1/profile/labHistory", labHistory);
 app.use("/api/v1/profile/profile", profile);
 app.use("/api/v1/activity", activityRoutes);
+app.use("/api/v1/admin/biology/addThreeD", addThreeDRouter);
+
 // 404 handler
 app.use((req, res) => {
   console.warn(`⚠️ 404 - ${req.method} ${req.originalUrl}`);
