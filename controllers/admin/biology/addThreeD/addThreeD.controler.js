@@ -11,22 +11,18 @@ export const bulkSaveModels = async (req, res) => {
       return res.status(400).json({ error: "Invalid data format" });
     }
 
-    // const savedModels = await Promise.all(
-    //   models.map((m) =>
-    //     prisma.threeModel.create({
-        const savedModels = await prisma.threeModel.create({
-     
-          data: {
-            uid: m.uid,
-            name: m.name,
-            thumbnail: m.thumbnail || "",
-            category: m.category || null,
-            subcategory: m.subcategory || null,
-            embedUrl: m.embedUrl || null,
-            uploaded_by: userId,
-          },
-        })
-      
+const savedModels=await prisma.threedmodel.createMany({
+  data: models.map((m) => ({
+    uid: m.uid,
+    name: m.name,
+    thumbnail: m.thumbnail || "",
+    category: m.category || null,
+    subcategory: m.subcategory || null,
+    embedUrl: m.embedUrl || null,
+    uploaded_by: userId,
+  })),
+  skipDuplicates: true,
+});
 
     res.json({ success: true, count: savedModels.length, models: savedModels });
   } catch (error) {
