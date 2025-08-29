@@ -11,16 +11,16 @@ export const profileData = async (req, res) => {
     console.log("Fetching lab history for user ID:", userId);
 
     // Get experiments
-    const experiments = await prisma.experimentStats.findMany({
+    const experiments = await prisma.experimentstats.findMany({
       where: { user_id: Number(userId) },
     });
 
     // Get time spent
-    const timeSpentRecords = await prisma.userActivity.findMany({
+    const timeSpentRecords = await prisma.useractivity.findMany({
       where: { user_id: Number(userId) },
     });
 
-    const totalTime = timeSpentRecords[0]?.totalTime || 0;
+    const totalTime = timeSpentRecords[0]?.totalTime;
 
     console.log(
       "Lab history -> experiments:",

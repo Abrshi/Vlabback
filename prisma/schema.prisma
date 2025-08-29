@@ -6,20 +6,19 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model chemicalreactionresult {
   id             Int      @id @default(autoincrement())
-  user_id        Int
   formula        String   @db.VarChar(255)
   reaction_type  String   @db.VarChar(50)
   color_gradient String   @db.VarChar(100)
   temperature    Int
   observations   String   @db.Text
   created_at     DateTime @default(now())
-  user           user     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "ChemicalReactionResult_user_id_fkey")
 
-  @@index([user_id], map: "ChemicalReactionResult_user_id_fkey")
+  user_id        Int
+  user           user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
+
 
 model experimentstats {
   id         Int      @id @default(autoincrement())
@@ -37,7 +36,7 @@ model session {
   user_id       Int
   refresh_token String   @db.VarChar(255)
   created_at    DateTime @default(now())
-  user          user     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "Session_user_id_fkey")
+  user          user     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "Session_user_id_fk")
 
   @@index([user_id], map: "Session_user_id_fkey")
 }
@@ -52,7 +51,7 @@ model threedmodel {
   embedUrl    String?  @db.VarChar(500)
   created_at  DateTime @default(now())
   uploaded_by Int?
-  user        user?    @relation(fields: [uploaded_by], references: [id], map: "ThreeDModel_uploaded_by_fkey")
+  user        user?    @relation(fields: [uploaded_by], references: [id], map: "ThreeDModel_uploaded_by_fk")
 
   @@index([uploaded_by], map: "ThreeDModel_uploaded_by_fkey")
 }

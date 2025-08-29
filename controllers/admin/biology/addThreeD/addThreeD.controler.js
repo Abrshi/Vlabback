@@ -34,7 +34,7 @@ const savedModels=await prisma.threedmodel.createMany({
 // Get all models
 export const getAllModels = async (req, res) => {
   try {
-    const models = await prisma.threeModel.findMany({
+    const models = await prisma.threedmodel.findMany({
       include: { user: { select: { id: true, full_name: true, email: true } } },
     });
     res.json(models);
@@ -48,7 +48,7 @@ export const getAllModels = async (req, res) => {
 export const getModelById = async (req, res) => {
   try {
     const { id } = req.params;
-    const model = await prisma.threeModel.findUnique({
+    const model = await prisma.threedmodel.findUnique({
       where: { id: Number(id) },
       include: { user: { select: { id: true, full_name: true, email: true } } },
     });

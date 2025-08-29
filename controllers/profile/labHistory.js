@@ -10,7 +10,7 @@ export const chlabHistory = async (req, res) => {
   console.log("Fetching lab history for user ID:", userId);
 
   try {
-    const experiments = await prisma.chemicalReactionResult.findMany({
+    const experiments = await prisma.chemicalreactionresult.findMany({
       where: { user_id: parseInt(userId) },
       orderBy: { created_at: "desc" },
       include: {

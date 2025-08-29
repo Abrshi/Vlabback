@@ -3,7 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-// // Import your routers
+// db test
+import pool from './db.js';
+
+// // Import my routers
 import authRouter from "./routes/auths/auth.router.js";
 import chemicalReaction  from "./routes/lab/chmistry/chemicalRiacction.router.js";
 import labHistory  from "./routes/profile/labHistory.router.js";
@@ -60,6 +63,11 @@ app.use((err, req, res, next) => {
   console.error("💥 Server Error:", err.stack || err.message);
   res.status(500).json({ message: "Internal server error" });
 });
+
+(async () => {
+  const result = await pool.query("SELECT NOW()");
+  console.log("Current time:", result.rows[0]);
+})();
 
 // Start server
 app.listen(PORT, () => {

@@ -1,22 +1,29 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+
 export const trackTime = async (req, res) => {
   try {
-   const { userId, timeSpent } = req.body; // get both from body
+    const { userId, timeSpent } = req.body;
     console.log("Tracking time:", { userId, timeSpent });
+
     if (!timeSpent) {
       return res.status(400).json({ error: "timeSpent is required" });
     }
 
-   await prisma.userActivity.upsert({
-  where: { user_id: userId },
-  update: { totalTime: { increment: parseInt(timeSpent, 10) } },
-  create: {
-    user_id: userId,
-    totalTime: parseInt(timeSpent, 10),
-  },
-});
+    const now = new Date();
 
+    await prisma.useractivity.upsert({
+      where: { user_id: userId },
+      update: { 
+        totalTime: { increment: parseInt(timeSpent, 10) },
+        updatedAt: now
+      },
+      create: {
+        user_id: userId,
+        totalTime: parseInt(timeSpent, 10),
+        updatedAt: now
+      },
+    });
 
     res.json({ message: "Time logged successfully" });
   } catch (error) {

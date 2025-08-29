@@ -69,7 +69,8 @@ No extra words, no markdown, no code fences — only JSON.
     }
 
     // 🔹 Save chemical reaction to DB safely
-    const savedReaction = await prisma.chemicalReactionResult.create({
+    const savedReaction = await prisma.chemicalreactionresult.create({
+
       data: {
         formula: jsonData.formula,
         reaction_type: jsonData.reaction_type,
@@ -84,7 +85,7 @@ No extra words, no markdown, no code fences — only JSON.
     console.log("Chemical reaction saved to DB:", savedReaction.id);
 
     // 🔹 Update experiment stats
-    await prisma.experimentStats.upsert({
+    await prisma.experimentstats.upsert({
       where: { user_id_exType: { user_id: userId, exType } },
       update: { count: { increment: 1 } },
       create: { user_id: userId, exType, count: 1 },
