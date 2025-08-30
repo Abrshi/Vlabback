@@ -9,10 +9,12 @@ import pool from './db.js';
 // // Import my routers
 import authRouter from "./routes/auths/auth.router.js";
 import chemicalReaction  from "./routes/lab/chmistry/chemicalRiacction.router.js";
+import getAll3DModel  from "./routes/lab/bioligy/getAll3DModel.router.js";
 import labHistory  from "./routes/profile/labHistory.router.js";
 import profile  from "./routes/profile/profile.router.js";
 import activityRoutes from "./routes/activity/activity.js";
 import addThreeDRouter from "./routes/admin/biology/addThreeD/addThreeD.route.js";
+// import { getAll3DModel } from "./controllers/lab/biology/get3dmodel.js";
 
 // // Initialize environment
 dotenv.config();
@@ -47,6 +49,7 @@ app.get("/", (req, res) => {
 // API routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/chemistry/chmistry", chemicalReaction);
+app.use("/api/v1/biology/threeD", getAll3DModel);
 app.use("/api/v1/profile/labHistory", labHistory);
 app.use("/api/v1/profile/profile", profile);
 app.use("/api/v1/activity", activityRoutes);
