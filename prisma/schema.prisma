@@ -53,6 +53,10 @@ model threedmodel {
   uploaded_by Int?
   user        user?    @relation(fields: [uploaded_by], references: [id], map: "ThreeDModel_uploaded_by_fk")
 
+ likes        modelLike[]
+  comments     modelComment[]
+
+  @@index([uid])
   @@index([uploaded_by], map: "ThreeDModel_uploaded_by_fkey")
 }
 
@@ -70,6 +74,9 @@ model user {
   session                session[]
   threedmodel            threedmodel[]
   useractivity           useractivity?
+  
+  modelLikes             modelLike[]
+  modelComments          modelComment[]
 }
 
 model useractivity {
@@ -78,6 +85,33 @@ model useractivity {
   totalTime Int      @default(0)
   updatedAt DateTime
   user      user     @relation(fields: [user_id], references: [id], map: "UserActivity_user_id_fkey")
+}
+model modelLike {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  modelId    Int
+  created_at DateTime    @default(now())
+
+  user       user        @relation(fields: [userId], references: [id])
+  model      threedmodel @relation(fields: [modelId], references: [id])
+
+  @@unique([userId, modelId]) // one like per user per model
+  @@index([modelId])
+  @@index([userId])
+}
+
+model modelComment {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  modelId    Int
+  content    String       @db.VarChar(500)
+  created_at DateTime     @default(now())
+
+  user       user         @relation(fields: [userId], references: [id])
+  model      threedmodel  @relation(fields: [modelId], references: [id])
+
+  @@index([modelId, created_at])
+  @@index([userId])
 }
 
 enum user_role {

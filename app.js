@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import pool from './db.js';
 
 // // Import my routers
-import authRouter from "./routes/auths/auth.router.js";
+import authRouter from "./routes/auths/auth.routes.js";
 import chemicalReaction  from "./routes/lab/chmistry/chemicalRiacction.router.js";
 import getAll3DModel  from "./routes/lab/bioligy/getAll3DModel.router.js";
 import labHistory  from "./routes/profile/labHistory.router.js";

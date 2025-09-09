@@ -1,0 +1,117 @@
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+const prisma = new PrismaClient();
+
+const generateAccessToken = (user) =>
+  jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: "15m",
+  });
+
+const generateRefreshToken = (user) =>
+  jwt.sign({ userId: user.id }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: "7d",
+  });
+
+// --- Signup ---
+export const signUp = async (req, res) => {
+  const { full_name, email, password } = req.body;
+
+  if (!full_name || !email || !password)
+    return res.status(400).json({ error: "All fields required" });
+
+  try {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) return res.status(409).json({ error: "Email already in use" });
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = await prisma.user.create({
+      data: { full_name, email, password: hashedPassword },
+    });
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    await prisma.session.create({
+      data: { user_id: user.id, refresh_token: refreshToken },
+    });
+
+    res
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      })
+      .json({ accessToken, user: { id: user.id, full_name, email, role: user.role } });
+  } catch (err) {
+    res.status(500).json({ error: "Signup failed" });
+  }
+};
+
+// --- Login ---
+export const signIn = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    await prisma.session.create({
+      data: { user_id: user.id, refresh_token: refreshToken },
+    });
+
+    res
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      })
+      .json({ accessToken, user: { id: user.id, full_name: user.full_name, email, role: user.role } });
+  } catch (err) {
+    res.status(500).json({ error: "Login failed" });
+  }
+};
+
+// --- Logout ---
+export const logout = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) return res.sendStatus(204);
+
+  try {
+    await prisma.session.deleteMany({ where: { refresh_token: refreshToken } });
+    res.clearCookie("refreshToken");
+    res.json({ message: "Logged out" });
+  } catch (err) {
+    res.status(500).json({ error: "Logout failed" });
+  }
+};
+
+// --- Refresh ---
+export const refreshToken = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) return res.status(401).json({ error: "No refresh token" });
+
+  try {
+    const session = await prisma.session.findUnique({ where: { refresh_token: refreshToken } });
+    if (!session) return res.status(403).json({ error: "Invalid refresh token" });
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
+      if (err) return res.status(403).json({ error: "Invalid refresh token" });
+
+      const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      const newAccessToken = generateAccessToken(user);
+      res.json({ accessToken: newAccessToken });
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Refresh failed" });
+  }
+};
