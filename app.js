@@ -15,6 +15,9 @@ import profile  from "./routes/profile/profile.router.js";
 import activityRoutes from "./routes/activity/activity.js";
 import addThreeDRouter from "./routes/admin/biology/addThreeD/addThreeD.route.js";
 // import { getAll3DModel } from "./controllers/lab/biology/get3dmodel.js";
+// middleware 
+import { authenticate } from "./middleware/auth.middleware.js"; // adjust path
+import { authorize } from "./middleware/authorize.middleware.js";
 
 // // Initialize environment
 dotenv.config();
@@ -47,13 +50,13 @@ app.get("/", (req, res) => {
 });
 
 // API routes
-app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/chemistry/chmistry", chemicalReaction);
-app.use("/api/v1/biology/threeD", getAll3DModel);
-app.use("/api/v1/profile/labHistory", labHistory);
-app.use("/api/v1/profile/profile", profile);
-app.use("/api/v1/activity", activityRoutes);
-app.use("/api/v1/admin/biology/addThreeD", addThreeDRouter);
+app.use("/api/v1/auth", authenticate, authRouter);
+app.use("/api/v1/chemistry/chmistry", authenticate, authenticate, authorize("user"), chemicalReaction);
+app.use("/api/v1/biology/threeD", authenticate, authenticate, authorize("user"), getAll3DModel);
+app.use("/api/v1/profile/labHistory", authenticate, authenticate, authorize("user"), labHistory);
+app.use("/api/v1/profile/profile", authenticate, authenticate, authorize("user"), profile);
+app.use("/api/v1/activity", authenticate, authenticate, authorize("admin"), activityRoutes);
+app.use("/api/v1/admin/biology/addThreeD", authenticate, authenticate, authorize("admin"), addThreeDRouter);
 
 // 404 handler
 app.use((req, res) => {

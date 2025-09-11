@@ -13,5 +13,4 @@ router.post("/refresh", refreshToken);
 router.get("/me", authenticate, (req, res) => {
   res.json({ message: "Protected data", user: req.user });
 });
-
 export default router;
