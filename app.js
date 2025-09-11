@@ -50,9 +50,9 @@ app.get("/", (req, res) => {
 });
 
 // API routes
-app.use("/api/v1/auth", authenticate, authRouter);
+app.use("/api/v1/auth",  authRouter);
 app.use("/api/v1/chemistry/chmistry", authenticate, authenticate, authorize("user"), chemicalReaction);
-app.use("/api/v1/biology/threeD", authenticate, authenticate, authorize("user"), getAll3DModel);
+app.use("/api/v1/biology/threeD", getAll3DModel);
 app.use("/api/v1/profile/labHistory", authenticate, authenticate, authorize("user"), labHistory);
 app.use("/api/v1/profile/profile", authenticate, authenticate, authorize("user"), profile);
 app.use("/api/v1/activity", authenticate, authenticate, authorize("admin"), activityRoutes);

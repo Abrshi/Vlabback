@@ -104,25 +104,22 @@ export const refreshToken = async (req, res) => {
   try {
     const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
-    // check if still valid in DB
     const session = await prisma.session.findFirst({
-      where: { user_id: payload.id, refresh_token: token },
+      where: { user_id: payload.userId, refresh_token: token },
     });
     if (!session) return res.status(403).json({ error: "Invalid refresh token" });
 
-    // get user again
-    const user = await prisma.user.findUnique({ where: { id: payload.id } });
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // issue new access token
     const newAccessToken = generateAccessToken(user);
-
     res.json({ accessToken: newAccessToken });
   } catch (err) {
     console.error(err);
     res.status(403).json({ error: "Invalid refresh token" });
   }
 };
+
 
 
 // --- Logout ---
