@@ -1,12 +1,12 @@
+// app.js
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
+import helmet from "helmet";
 import { fileURLToPath } from "url";
-// db test
-import pool from './db.js';
+import pool from "./db.js";
 
-// // Import my routers
 import authRouter from "./routes/auths/auth.routes.js";
 import chemicalReaction  from "./routes/lab/chmistry/chemicalRiacction.router.js";
 import getAll3DModel  from "./routes/lab/bioligy/getAll3DModel.router.js";
@@ -19,7 +19,7 @@ import addThreeDRouter from "./routes/admin/biology/addThreeD/addThreeD.route.js
 import { authenticate } from "./middleware/auth.middleware.js"; // adjust path
 import { authorize } from "./middleware/authorize.middleware.js";
 
-// // Initialize environment
+// Load environment variables
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5500;
@@ -27,19 +27,20 @@ const PORT = process.env.PORT || 5500;
 // For serving static files (if needed later)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// Uncomment if you want to serve static files from a "public" folder
 // app.use(express.static(path.join(__dirname, "public")));
 
-// CORS configuration
-app.use(cors({
-  origin: ["http://localhost:3000","https://vlabeth.netlify.app"],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+// Security headers
+app.use(helmet());
 
-// Handle preflight requests
-// app.options("*", cors());
+// CORS configuration
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://vlabeth.netlify.app"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 // JSON body parser
 app.use(express.json());
@@ -49,14 +50,50 @@ app.get("/", (req, res) => {
   res.send({ message: "V-Lab Ethiopia API is running..." });
 });
 
-// API routes
-app.use("/api/v1/auth",  authRouter);
-app.use("/api/v1/chemistry/chmistry", authenticate, authenticate, authorize("user"), chemicalReaction);
-app.use("/api/v1/biology/threeD",authenticate, authenticate, authorize("user"), getAll3DModel);
-app.use("/api/v1/profile/labHistory", authenticate, authenticate, authorize("user"), labHistory);
-app.use("/api/v1/profile/profile", authenticate, authenticate, authorize("user"), profile);
-app.use("/api/v1/activity", authenticate, authenticate, authorize("admin"), activityRoutes);
-app.use("/api/v1/admin/biology/addThreeD", authenticate, authenticate, authorize("admin"), addThreeDRouter);
+// ---------- API Routes ----------
+
+// Public
+app.use("/api/v1/auth", authRouter);
+
+// User-protected
+app.use(
+  "/api/v1/chemistry/chemical-reaction",
+  authenticate,
+  authorize("user"),
+  chemicalReaction
+);
+app.use(
+  "/api/v1/biology/threeD",
+  authenticate,
+  authorize("user"),
+  getAll3DModel
+);
+app.use(
+  "/api/v1/profile/lab-history",
+  authenticate,
+  authorize("user"),
+  labHistory
+);
+app.use(
+  "/api/v1/profile",
+  authenticate,
+  authorize("user"),
+  profile
+);
+
+app.use(
+  "/api/v1/activity",
+  
+  activityRoutes
+);
+app.use(
+  "/api/v1/admin/biology/add-threeD",
+  authenticate,
+  authorize("admin"),
+  addThreeDRouter
+);
+
+// ---------- Error & 404 Handling ----------
 
 // 404 handler
 app.use((req, res) => {
@@ -67,18 +104,27 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error("💥 Server Error:", err.stack || err.message);
-  res.status(500).json({ message: "Internal server error" });
+  res
+    .status(err.status || 500)
+    .json({ message: err.message || "Internal server error" });
 });
 
+// ---------- DB Connection Test ----------
 (async () => {
-  const result = await pool.query("SELECT NOW()");
-  console.log("Current time:", result.rows[0]);
+  try {
+    const result = await pool.query("SELECT NOW()");
+    console.log("✅ Database connected. Current time:", result.rows[0]);
+  } catch (err) {
+    console.error("❌ Database connection failed:", err.message);
+  }
 })();
 
-// Start server
+// ---------- Start Server ----------
 app.listen(PORT, () => {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV === "development") {
     console.log(`✅ Server running on http://localhost:${PORT}`);
+  } else {
+    console.log(`✅ Server running on port ${PORT}`);
   }
 });
 
