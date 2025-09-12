@@ -14,6 +14,8 @@ import labHistory  from "./routes/profile/labHistory.router.js";
 import profile  from "./routes/profile/profile.router.js";
 import activityRoutes from "./routes/activity/activity.js";
 import addThreeDRouter from "./routes/admin/biology/addThreeD/addThreeD.route.js";
+
+import userRoutes from "./routes/admin/user/user.routes.js";
 // import { getAll3DModel } from "./controllers/lab/biology/get3dmodel.js";
 // middleware 
 import { authenticate } from "./middleware/auth.middleware.js"; // adjust path
@@ -35,7 +37,7 @@ app.use(helmet());
 // CORS configuration
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://vlabeth.netlify.app"],
+    origin: ["http://localhost:3001", "https://vlabeth.netlify.app"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -57,27 +59,27 @@ app.use("/api/v1/auth", authRouter);
 
 // User-protected
 app.use(
-  "/api/v1/chemistry/chemical-reaction",
-  authenticate,
-  authorize("user"),
+  "/api/v1/chemistry/chmistry/chemicalReaction",
+   
+  
   chemicalReaction
 );
 app.use(
   "/api/v1/biology/threeD",
-  authenticate,
-  authorize("user"),
+   
+  
   getAll3DModel
 );
 app.use(
   "/api/v1/profile/lab-history",
-  authenticate,
-  authorize("user"),
+   
+  
   labHistory
 );
 app.use(
   "/api/v1/profile",
-  authenticate,
-  authorize("user"),
+   
+  
   profile
 );
 
@@ -88,9 +90,13 @@ app.use(
 );
 app.use(
   "/api/v1/admin/biology/add-threeD",
-  authenticate,
-  authorize("admin"),
+   
+  
   addThreeDRouter
+);
+app.use(
+  "/api/v1/admin/users",
+ authenticate
 );
 
 // ---------- Error & 404 Handling ----------
