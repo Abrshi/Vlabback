@@ -71,13 +71,13 @@ app.use(
   getAll3DModel
 );
 app.use(
-  "/api/v1/profile/lab-history",
+  "/api/v1/profile/labHistory",
    
   
   labHistory
 );
 app.use(
-  "/api/v1/profile",
+  "/api/v1/profile/profile",
    
   
   profile
