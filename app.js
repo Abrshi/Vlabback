@@ -96,7 +96,7 @@ app.use(
 );
 app.use(
   "/api/v1/admin/users",
- authenticate
+ userRoutes
 );
 
 // ---------- Error & 404 Handling ----------
